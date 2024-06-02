@@ -1,3 +1,5 @@
+library(targets)
+
 source("functions.R")
 source("_packages.R")
 options(timeout=24*60*60) # let things download for at least 24 hours (important while on slow internet connection)
