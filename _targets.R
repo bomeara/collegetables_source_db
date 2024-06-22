@@ -7,5 +7,6 @@ options(download.file.method = "libcurl")
 
 list(
  tar_target(min_year, 2012),
- tar_target(created_db, CreateDB(min_year=min_year))
+ tar_target(created_db, CreateDB(min_year=min_year)),
+ tar_target(sensible_db, ProcessIntoSensibleDatabase(created_db))
 )

@@ -1,2 +1,7 @@
 library(mdbr)
 library(RSQLite)
+library(tidyverse)
+library(data.table)
+library(dtplyr)
+library(dplyr, warn.conflicts = FALSE)
+library(igraph)
