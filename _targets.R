@@ -11,5 +11,6 @@ list(
  tar_target(sensible_db, ProcessIntoSensibleDatabase(created_db)), # input is completion time of the previous step, so it only runs if previous one changes, without needing to pass in anything fancy
  tar_target(college_data_raw, CreateCollegeDataAllYears(sensible_db)),
  tar_target(college_data, AggregatePercentages(college_data_raw)),
+ tar_target(write_unique_pairs, write.csv(GetUniquePairsOfCategoryAndVariable(college_data), "~/Downloads/unique_pairs.csv")),
  tar_target(college_data_most_recent, GetLatestYear(college_data))
 )

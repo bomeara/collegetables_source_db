@@ -628,6 +628,52 @@ AggregatePercentages <- function(college_data) {
 	
 	rm(AdmissionRateDataWide)
 	
+	RaceGenderCategories <- c('EFTOTLM___GRAND.TOTAL.MEN',
+	'EFTOTLW___GRAND.TOTAL.WOMEN',
+	'EFAIANT___AMERICAN.INDIAN.OR.ALASKA.NATIVE.TOTAL',
+	'EFAIANM___AMERICAN.INDIAN.OR.ALASKA.NATIVE.MEN',
+	'EFAIANW___AMERICAN.INDIAN.OR.ALASKA.NATIVE.WOMEN',
+	'EFASIAT___ASIAN.TOTAL',
+	'EFASIAM___ASIAN.MEN',
+	'EFASIAW___ASIAN.WOMEN',
+	'EFBKAAT___BLACK.OR.AFRICAN.AMERICAN.TOTAL',
+	'EFBKAAM___BLACK.OR.AFRICAN.AMERICAN.MEN',
+	'EFBKAAW___BLACK.OR.AFRICAN.AMERICAN.WOMEN',
+	'EFHISPT___HISPANIC.TOTAL',
+	'EFHISPM___HISPANIC.MEN',
+	'EFHISPW___HISPANIC.WOMEN',
+	'EFNHPIT___NATIVE.HAWAIIAN.OR.OTHER.PACIFIC.ISLANDER.TOTAL',
+	'EFNHPIM___NATIVE.HAWAIIAN.OR.OTHER.PACIFIC.ISLANDER.MEN',
+	'EFNHPIW___NATIVE.HAWAIIAN.OR.OTHER.PACIFIC.ISLANDER.WOMEN',
+	'EFWHITT___WHITE.TOTAL',
+	'EFWHITM___WHITE.MEN',
+	'EFWHITW___WHITE.WOMEN',
+	'EF2MORT___TWO.OR.MORE.RACES.TOTAL',
+	'EF2MORM___TWO.OR.MORE.RACES.MEN',
+	'EF2MORW___TWO.OR.MORE.RACES.WOMEN',
+	'EFUNKNT___RACE.ETHNICITY.UNKNOWN.TOTAL',
+	'EFUNKNM___RACE.ETHNICITY.UNKNOWN.MEN',
+	'EFUNKNW___RACE.ETHNICITY.UNKNOWN.WOMEN',
+	'EFNRALT___U.S..NONRESIDENT.TOTAL',
+	'EFNRALM___U.S..NONRESIDENT.MEN',
+	'EFNRALW___U.S..NONRESIDENT.WOMEN')
+	
+	EnrollmentRaceGenderWide <- college_data[college_data$Variable %in% c("UNITID", "REPORTYEAR", 
+	'EFTOTLT___GRAND.TOTAL', RaceGenderCategories),] |> pivot_wider(id_cols=c("UNITID", "REPORTYEAR"), names_from="Variable", values_from="Value")
+	
+	for(col_index in 3:ncol(EnrollmentRaceGenderWide)) {
+		EnrollmentRaceGenderWide[[col_index]] <- as.numeric(EnrollmentRaceGenderWide[[col_index]])
+	}
+	
+	for(category_index in sequence(length(RaceGenderCategories)) ) {
+		col_name <- RaceGenderCategories[category_index]
+		col_cleaned_name <- paste0("EnrollmentPercent_",gsub("___.*$", "", col_name))
+		college_data <- rbind(college_data, data.frame(UNITID=EnrollmentRaceGenderWide$UNITID, REPORTYEAR=EnrollmentRaceGenderWide$REPORTYEAR, Variable=col_cleaned_name, Value=100*EnrollmentRaceGenderWide[[col_name]]/EnrollmentRaceGenderWide$EFTOTLT___GRAND.TOTAL, Category="EnrollmentRaceGender"))
+	}
+	rm(EnrollmentRaceGenderWide)
+	
+	
+	
 	
 	
 	return(college_data)	
@@ -637,6 +683,13 @@ GetLatestYear <- function(college_data) {
 	college_data$IndexColumn <- paste0(college_data$UNITID, "___", college_data$Variable)	
 	latest_year <- college_data[order(college_data$REPORTYEAR, decreasing=TRUE),]
 	latest_year <- latest_year[!duplicated(latest_year$IndexColumn),]
-	latest_year <- latest_year |> dplyr::select(-IndexColumn)
+	latest_year <- latest_year |> dplyr::select(-IndexColumn )
 	return(latest_year)
+}
+
+GetUniquePairsOfCategoryAndVariable <- function(college_data) {
+	college_data$IndexColumn <- paste0(college_data$Category, "___", college_data$Variable)	
+	unique_pairs <- college_data[!duplicated(college_data$IndexColumn),]
+	unique_pairs <- unique_pairs |> dplyr::select(-IndexColumn, -REPORTYEAR, -UNITID)
+	return(unique_pairs)
 }
